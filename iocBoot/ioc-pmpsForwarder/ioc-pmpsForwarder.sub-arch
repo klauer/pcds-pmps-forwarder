@@ -1,0 +1,10 @@
+# IOC archive file
+## Replace TST:PMPS:FWD: with the PV prefix used for
+## iocAdmin PV's on this IOC
+
+# Generate IOC archive request 
+file pmpsForwarder-ioc.archive
+{
+	{ IOC = "TST:PMPS:FWD:" }
+}
+
