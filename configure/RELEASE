@@ -9,10 +9,17 @@ include $(TOP)/RELEASE_SITE
 AUTOSAVE_MODULE_VERSION   = R5.8-2.1.0
 IOCADMIN_MODULE_VERSION   = R3.1.15-1.0.1
 ASYN_MODULE_VERSION       = R4-35
+
+# TODO: motor is only here for testing - should be removed
 MOTOR_MODULE_VERSION      = R7-0
 EC_MOTOR_MODULE_VERSION   = R2.1.0-85-g87d12fe
-ADS_MODULE_VERSION        = R2.0.0-0.0.1
 
+ADS_MODULE_VERSION        = R2.0.0-0.0.1
+CALC_MODULE_VERSION       = R3.7-1.0.0
+SNCSEQ_MODULE_VERSION     = R2.2.4-1.0
+
+# NOTE: CALC requires sscan to link, though we do not use it:
+SSCAN_MODULE_VERSION      = R2.10.2-1.0.0
 
 # ============================================================
 # External Support module path definitions
@@ -29,6 +36,11 @@ ADS_MODULE_VERSION        = R2.0.0-0.0.1
 # ============================================================
 AUTOSAVE=$(EPICS_MODULES)/autosave/$(AUTOSAVE_MODULE_VERSION)
 IOCADMIN=$(EPICS_MODULES)/iocAdmin/$(IOCADMIN_MODULE_VERSION)
+CALC=$(EPICS_MODULES)/calc/$(CALC_MODULE_VERSION)
+SNCSEQ=$(EPICS_MODULES)/seq/$(SNCSEQ_MODULE_VERSION)
+CALC=$(EPICS_MODULES)/calc/$(CALC_MODULE_VERSION)
+SSCAN=$(EPICS_MODULES)/sscan/$(SSCAN_MODULE_VERSION)
+
 
 # TODO - move these library versions to common support
 KLAUER_MODULES=/reg/neh/home/klauer/modules/
