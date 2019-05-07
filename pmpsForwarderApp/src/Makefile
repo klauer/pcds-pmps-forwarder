@@ -14,6 +14,8 @@ DBD += pmpsForwarder.dbd
 
 pmpsForwarder_DBD += base.dbd
 # Libraries for all IOCs - ioc stats and autosave
+pmpsForwarder_DBD += pmps_forwarder.dbd
+
 pmpsForwarder_DBD += iocAdmin.dbd
 pmpsForwarder_DBD += asSupport.dbd
 # Basic useful records - calc
@@ -27,6 +29,7 @@ pmpsForwarder_DBD += devSoftMotor.dbd
 pmpsForwarder_DBD += EthercatMcSupport.dbd
 
 # pmpsForwarder_registerRecordDeviceDriver.cpp will be created from pmpsForwarder.dbd
+pmpsForwarder_SRCS += heartbeat.st
 pmpsForwarder_SRCS += pmpsForwarder_registerRecordDeviceDriver.cpp
 pmpsForwarder_SRCS_DEFAULT += pmpsForwarderMain.cpp
 
