@@ -3,7 +3,8 @@
 < envPaths
 epicsEnvSet("IOCNAME", "ioc-pmpsForwarder" )
 epicsEnvSet("ENGINEER", "klauer" )
-epicsEnvSet("LOCATION", "TST:PMPS:FWD:" )
+epicsEnvSet("PREFIX", "TST:PMPS:FWD:")
+epicsEnvSet("LOCATION", "$(PREFIX)" )
 epicsEnvSet("IOCSH_PS1", "$(IOCNAME)> " )
 
 # For single PLC IOCs, modify only the following:
@@ -29,6 +30,7 @@ asynSetTraceInfoMask("$(PLC_PORT)", -1, 15)
 
 # Load record instances
 dbLoadRecords("db/heartbeat.db","P=TST:PMPS:FWD:,PORT=$(PLC_PORT)")
+dbLoadRecords("db/pmps.db","P=TST:PMPS:FWD:, ALARM1=TST:PMPS:FWD:HB_Alarm, PORT=$(PLC_PORT)")
 dbLoadRecords("","P=,PORT=$(PLC_PORT)")
 
 dbLoadRecords("db/iocAdmin.db",	"P=TST:PMPS:FWD:,IOC=TST:PMPS:FWD:" )
@@ -46,7 +48,7 @@ dbLoadRecords("db/save_restoreStatus.db", "P=TST:PMPS:FWD:,IOC=TST:PMPS:FWD:" )
 # Initialize the IOC and start processing records
 iocInit()
 
-seq(&HeartbeatMonitor, "HEARTBEAT_PV=TST:PMPS:FWD:HEARTBEAT, LATCH_ALARM_PV=, MISSED_BEAT_PV, INITIALIZED_PV=, HEART_RATE=")
+seq(&HeartbeatMonitor, "HEARTBEAT_PV=$(PREFIX)Heartbeat, LATCH_ALARM_PV=$(PREFIX)HB_LatchAlarm, SKIPPED_BEAT_PV=$(PREFIX)HB_SkippedBeat.PROC, INITIALIZED_PV=$(PREFIX)HB_Initialized, HEART_RATE=0.1, BYGONES=2.0, MAX_SKIPPED=1")
 
 # Start autosave backups
 create_monitor_set( "$(IOC).req", 5, "" )

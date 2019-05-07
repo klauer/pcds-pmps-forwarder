@@ -10,6 +10,7 @@ include $(TOP)/configure/CONFIG
 #----------------------------------------------------
 # Create and install (or just install)
 # databases, templates, substitutions like this
+DB += pmps.db
 DB += heartbeat.db
 
 DB_INSTALLS += $(AUTOSAVE)/db/save_restoreStatus.db
