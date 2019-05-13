@@ -48,7 +48,7 @@ dbLoadRecords("db/save_restoreStatus.db", "P=TST:PMPS:FWD:,IOC=TST:PMPS:FWD:" )
 # Initialize the IOC and start processing records
 iocInit()
 
-seq(&HeartbeatMonitor, "HEARTBEAT_PV=$(PREFIX)Heartbeat, LATCH_ALARM_PV=$(PREFIX)HB_LatchAlarm, SKIPPED_BEAT_PV=$(PREFIX)HB_SkippedBeat.PROC, INITIALIZED_PV=$(PREFIX)HB_Initialized, HEART_RATE=0.1, BYGONES=2.0, MAX_SKIPPED=1")
+seq(&HeartbeatMonitor, "HEARTBEAT_PV=TST:PMPS:HEART:heartbeat, LATCH_ALARM_PV=$(PREFIX)HB_LatchAlarm, SKIPPED_BEAT_PV=$(PREFIX)HB_SkippedBeat.PROC, INITIALIZED_PV=$(PREFIX)HB_Initialized, HEART_RATE=0.5, BYGONES=2.0, MAX_SKIPPED=3")
 
 # Start autosave backups
 create_monitor_set( "$(IOC).req", 5, "" )
