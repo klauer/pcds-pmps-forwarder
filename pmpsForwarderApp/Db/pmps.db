@@ -1,0 +1,39 @@
+record(bi, "$(P)PMPSState") {
+    field(TPRO, "1")
+    field(VAL, "0")
+
+    field(ZNAM, "OK")
+    field(ZSV,  "NO_ALARM")
+
+    field(ONAM, "ERROR")
+    field(OSV,  "MAJOR")
+    # field(COSV, "MAJOR")
+}
+
+record(bo, "$(P)Acknowledge") {
+    field(ZNAM, "Off")
+    field(ONAM, "Acknowledge")
+}
+
+record(calcout, "$(P)_Acknowledge") {
+    field(CALC, "A")
+    field(INPA, "$(P)Acknowledge CP MS")
+
+    # Output 0 to PMPSState when Acknowledge is toggled to 1
+    field(OOPT, "Transition To Non-zero")
+    field(DOPT, "Use OCAL")
+    field(OCAL, "0")
+    field(OUT, "$(P)PMPSState PP")
+}
+
+record(calc, "$(P)_PMPSStateCalc") {
+    field(CALC, "A")
+    field(INPA, "$(ALARM1) CP MS")
+}
+
+record(calcout, "$(P)_StateLatch") {
+    field(CALC, "A")
+    field(INPA, "$(P)_PMPSStateCalc CP MS")
+    field(OOPT, "Transition To Non-zero")
+    field(OUT, "$(P)PMPSState")
+}
