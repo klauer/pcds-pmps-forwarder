@@ -1,0 +1,67 @@
+# vi: sw=4 ts=4 sts=4 expandtab
+
+
+# Sequencer requests an alarm latch through this record:
+record(bo, "$(P)LatchAlarm") {
+    field(ZNAM, "Not latched")
+    field(ONAM, "Latch request")
+}
+
+# _LatchAlarmOut sets the PMPSState to ERROR
+record(calcout, "$(P)_LatchAlarmOut") {
+   
+    field(CALC, "A || !B")
+    field(INPA, "$(P)LatchAlarm CP MS")
+    field(INPB, "$(P)Initialized CP MS")
+
+    # Output 1 to PMPSState when CALC goes from 0 to non-zero
+    field(OOPT, "Transition To Non-zero")
+    field(DOPT, "Use OCAL")
+    field(OCAL, "1")
+    field(OUT, "$(P)PMPSState PP")
+
+    # If alarm status is raised
+    field(IVOV, "1")
+    field(IVOA, "Set output to IVOV")
+}
+
+# Is the heartbeat being monitored yet by the sequencer?
+record(bi, "$(P)Initialized") {
+    field(ZNAM, "Uninitialized")
+    field(ZSV,  "MAJOR")
+    field(ONAM, "Initialized")
+    field(OSV,  "NO_ALARM")
+    field(TPRO, "1")
+}
+
+# All-time skipped beat count (incremented by sequencer)
+record(calc, "$(P)SkippedBeat") {
+    field(CALC, "A + 1")
+    field(INPA, "$(P)SkippedBeat NPP NMS")
+    field(TPRO, "1")
+}
+
+
+
+# record(stringin, "$(P):ApAutoTuneStat") {
+#   field(SDIS, "$(P):ApAutoTnStatSev.VAL NPP MS")
+#   field(DISV, "-1") # Will never disable, but will propagate severity
+#   field(VAL, "Idle")
+#   field(PINI, "YES")
+# }
+# 
+# record(mbbi, "$(P):ApAutoTnStatSev") {
+#   field(VAL, "0")
+#   field(ZRVL, "0")
+#   field(ZRST, "NO_ALARM")
+#   field(ONVL, "1")
+#   field(ONST, "MINOR")
+#   field(ONSV, "MINOR")
+#   field(TWVL, "2")
+#   field(TWST, "MAJOR")
+#   field(TWSV, "MAJOR")
+#   field(THVL, "2")
+#   field(THST, "INVALID")
+#   field(THSV, "INVALID")
+#   field(PINI, "YES")
+# }

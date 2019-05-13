@@ -1,0 +1,9 @@
+# vi: sw=4 ts=4 sts=4 expandtab
+
+
+record(calc, "$(P)HEARTBEAT") {
+    field(SCAN, ".5 second")
+    field(CALC, "1 - A")
+    field(VAL,  "0")
+    field(INPA, "$(P)HEARTBEAT NPP NMS")
+}
