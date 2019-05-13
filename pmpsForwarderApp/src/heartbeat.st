@@ -171,6 +171,11 @@ ss HeartbeatMonitor {
 
         when (pvSeverity(heartbeat) == pvSevrOK && heartbeat == 1 && heartbeat != last_beat) {
         } state HeartbeatOne
+
+        exit {
+            latch_alarm = 0;
+            pvPut(latch_alarm, SYNC);
+        }
     }
 
     state SkippedAnotherBeat {
