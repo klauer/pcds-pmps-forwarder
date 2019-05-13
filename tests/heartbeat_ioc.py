@@ -81,25 +81,6 @@ class HeartbeatGroup(PVGroup):
             scan._data['value'] = scan.enum_strings.index('.5 second')
 
 
-all_beam_params = {
-    'SXU': dict(k0=13.997,
-                a=-5.131,
-                b=1.878,
-                period=39.,
-                gap_range=(7.2, 20),
-                electron_energy_range=(3.6, 4.0),
-                ),
-    # hxu assuming copper line (SCRF line is slightly different, gap-wise)
-    'HXU': dict(k0=9.471,
-                a=-5.131,
-                b=1.878,
-                period=26.,
-                gap_range=(7.2, 19),
-                electron_energy_range=(2.5, 15.0),
-                ),
-}
-
-
 class UndulatorInfoGroup(PVGroup):
     k0 = pvproperty(value=0.0, read_only=True)
     a = pvproperty(value=0.0, read_only=True)
@@ -172,33 +153,44 @@ class BeamlineGroup(PVGroup):
     heartbeat = SubGroup(HeartbeatGroup, prefix='')
     beam_params = SubGroup(BeamParametersGroup, prefix='')
 
-    def __init__(self, *args, param_key, **kwargs):
+    def __init__(self, *args, params, **kwargs):
         super().__init__(*args, **kwargs)
 
-        param_info = all_beam_params[param_key]
-        self.param_info = param_info
-        beam_params = self.beam_params
-
-        lower_gap, upper_gap = param_info['gap_range']
-        beam_params.gap._data.update(
+        lower_gap, upper_gap = params['gap_range']
+        self.beam_params.gap._data.update(
             lower_ctrl_limit=lower_gap,
             upper_ctrl_limit=upper_gap
         )
 
-        lower_energy, upper_energy = param_info['electron_energy_range']
-        beam_params.electron_energy._data.update(
+        lower_energy, upper_energy = params['electron_energy_range']
+        self.beam_params.electron_energy._data.update(
             lower_ctrl_limit=lower_energy,
             upper_ctrl_limit=upper_energy,
         )
 
         und_info = self.beam_params.undulator_info
         for param in ('k0', 'a', 'b', 'period'):
-            getattr(und_info, param)._data['value'] = param_info[param]
+            getattr(und_info, param)._data['value'] = params[param]
 
 
 class AcceleratorGroup(PVGroup):
-    hxu = SubGroup(BeamlineGroup, param_key='HXU')
-    sxu = SubGroup(BeamlineGroup, param_key='SXU')
+    # hxu assuming copper line (SCRF line is slightly different, gap-wise)
+    hxu = SubGroup(BeamlineGroup,
+                   params=dict(k0=9.471,
+                               a=-5.131, b=1.878,
+                               period=26.,
+                               gap_range=(7.2, 19),
+                               electron_energy_range=(2.5, 15.0),
+                               )
+                   )
+    sxu = SubGroup(BeamlineGroup,
+                   params=dict(k0=13.997,
+                               a=-5.131, b=1.878,
+                               period=39.,
+                               gap_range=(7.2, 20),
+                               electron_energy_range=(3.6, 4.0),
+                               )
+                   )
 
 
 if __name__ == '__main__':
