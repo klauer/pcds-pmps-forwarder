@@ -87,6 +87,12 @@ class UndulatorInfoGroup(PVGroup):
     b = pvproperty(value=0.0, read_only=True)
     period = pvproperty(value=0, read_only=True)
 
+    def calculate_k(self, gap):
+        'Calculate K, given an undulator gap'
+        return calculate_k(k0=self.k0.value, a=self.a.value, b=self.b.value,
+                           period=self.period.value, gap=gap)
+
+
 
 class BeamParametersGroup(PVGroup):
     undulator_info = SubGroup(UndulatorInfoGroup, prefix='')
@@ -104,11 +110,20 @@ class BeamParametersGroup(PVGroup):
         doc='Bunch charge'
     )
 
+    async def _recalculate(self, instance, value):
+        await self.k.write(self.undulator_info.calculate_k(self.gap.value))
+        await self.photon_energy.write(
+            calculate_photon_energy(electron_energy=self.electron_energy.value,
+                                    period=self.undulator_info.period.value,
+                                    k=self.k.value)
+        )
+
     gap = pvproperty(
         value=10.,
         doc='Undulator gap',
         mock_record='ai',
         units='mm',
+        put=_recalculate,
     )
 
     k = pvproperty(
@@ -119,53 +134,46 @@ class BeamParametersGroup(PVGroup):
     )
 
     electron_energy = pvproperty(
-        value=10,
+        value=0.0,
         doc='Electron energy',
-        read_only=True,
-        units='GeV'
+        units='GeV',
+        precision=4,
+        put=_recalculate,
     )
 
     photon_energy = pvproperty(
-        value=10,
+        value=0.0,
         doc='Photon energy',
-        read_only=True
+        read_only=True,
+        precision=4,
     )
 
-    @gap.putter
-    async def gap(self, instance, value):
-        k = calculate_k(
-            k0=self.undulator_info.k0.value, a=self.undulator_info.a.value,
-            b=self.undulator_info.b.value,
-            period=self.undulator_info.period.value,
-            gap=value,
-        )
-
-        await self.k.write(k)
-
-        photon_energy = calculate_photon_energy(
-            electron_energy=self.electron_energy.value,
-            period=self.undulator_info.period.value,
-            k=k)
-        await self.photon_energy.write(photon_energy)
+    @gap.startup
+    async def gap(self, instance, async_lib):
+        # Ensure k/photon energy is calculated on startup
+        await instance.write(instance.value)
 
 
 class BeamlineGroup(PVGroup):
     heartbeat = SubGroup(HeartbeatGroup, prefix='')
     beam_params = SubGroup(BeamParametersGroup, prefix='')
 
-    def __init__(self, *args, params, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        params = self.params
         lower_gap, upper_gap = params['gap_range']
         self.beam_params.gap._data.update(
             lower_ctrl_limit=lower_gap,
-            upper_ctrl_limit=upper_gap
+            upper_ctrl_limit=upper_gap,
+            value=lower_gap,
         )
 
         lower_energy, upper_energy = params['electron_energy_range']
         self.beam_params.electron_energy._data.update(
             lower_ctrl_limit=lower_energy,
             upper_ctrl_limit=upper_energy,
+            value=lower_energy,
         )
 
         und_info = self.beam_params.undulator_info
@@ -173,24 +181,32 @@ class BeamlineGroup(PVGroup):
             getattr(und_info, param)._data['value'] = params[param]
 
 
-class AcceleratorGroup(PVGroup):
+class HxuBeamlineGroup(BeamlineGroup):
     # hxu assuming copper line (SCRF line is slightly different, gap-wise)
-    hxu = SubGroup(BeamlineGroup,
-                   params=dict(k0=9.471,
-                               a=-5.131, b=1.878,
-                               period=26.,
-                               gap_range=(7.2, 19),
-                               electron_energy_range=(2.5, 15.0),
-                               )
-                   )
-    sxu = SubGroup(BeamlineGroup,
-                   params=dict(k0=13.997,
-                               a=-5.131, b=1.878,
-                               period=39.,
-                               gap_range=(7.2, 20),
-                               electron_energy_range=(3.6, 4.0),
-                               )
-                   )
+    params = dict(
+        k0=9.471,
+        a=-5.131,
+        b=1.878,
+        period=26.,
+        gap_range=(7.2, 19),
+        electron_energy_range=(2.5, 15.0),
+    )
+
+
+class SxuBeamlineGroup(BeamlineGroup):
+    params = dict(
+        k0=13.997,
+        a=-5.131,
+        b=1.878,
+        period=39.,
+        gap_range=(7.2, 20),
+        electron_energy_range=(3.6, 4.0),
+    )
+
+
+class AcceleratorGroup(PVGroup):
+    hxu = SubGroup(HxuBeamlineGroup)
+    sxu = SubGroup(SxuBeamlineGroup)
 
 
 if __name__ == '__main__':
